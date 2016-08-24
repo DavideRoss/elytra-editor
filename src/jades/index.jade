@@ -1,0 +1,35 @@
+doctype
+html
+    head
+        script(type="text/javascript", src="/libs/angular.min.js")
+        script(type="text/javascript", src="/libs/angular-route.min.js")
+        script(type="text/javascript", src="/libs/angular-resource.min.js")
+        script(type="text/javascript", src="/libs/three.min.js")
+        script(type="text/javascript", src="/libs/lodash.min.js")
+        script(type="text/javascript", src="/libs/async.min.js")
+        script(type="text/javascript", src="/libs/OrbitControls.js")
+
+        script(type="text/javascript", src="js/app.js")
+
+        link(rel="stylesheet", href="/css/normalize.min.css")
+        link(rel="stylesheet", href="/css/style.css")
+
+    body(ng-app="App")
+        three.three-render(model="model")
+        #debug-div
+        //- .panel
+        //-     .user-bar
+        //-         img(src="https://unsplash.it/200")
+        //-         span Lampadina
+        //-     .module
+        //-         h2 Walker
+        //-         button(ng-click="sendLogin()") Login
+        //-         p Login status: {{loginStatus}}
+        //-     .module(ng-show="isLoggedIn")
+        //-         h2 Location
+        //-         button(ng-click="setLocation()") Set location
+        //-         p Location: {{serverLocation}}
+        //-     .module(ng-show="serverLocation")
+        //-         h2 Start
+        //-         button(ng-click="start()") Start
+        //-         p Status:
