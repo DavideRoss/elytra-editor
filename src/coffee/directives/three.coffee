@@ -35,7 +35,6 @@ App.directive 'three', () ->
                 # ===== Camera ====================================================================
 
                 camera = new THREE.PerspectiveCamera 60, e[0].clientWidth / e[0].clientHeight, .1, 10000
-                camera.focus = 10000
 
                 scene.add camera
                 camera.position.z = 30
