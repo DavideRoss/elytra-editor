@@ -9,5 +9,5 @@ App.run ['$rootScope', '$http',
             setTimeout () ->
                 $rootScope.model = res.data
                 $rootScope.$apply()
-            , 100
+            , 1000
 ]

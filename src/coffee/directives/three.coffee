@@ -5,6 +5,7 @@ App.directive 'three', () ->
         template: '<div id="three-render"></div>'
         scope:
             model: '='
+            onReady: '='
 
         link: ($scope, e) ->
 
@@ -33,7 +34,8 @@ App.directive 'three', () ->
 
                 # ===== Camera ====================================================================
 
-                camera = new THREE.PerspectiveCamera 70, e[0].clientWidth / e[0].clientHeight, .1, 10000
+                camera = new THREE.PerspectiveCamera 60, e[0].clientWidth / e[0].clientHeight, .1, 10000
+                camera.focus = 10000
 
                 scene.add camera
                 camera.position.z = 30
@@ -64,16 +66,17 @@ App.directive 'three', () ->
                 animate = () ->
                     requestAnimationFrame animate
                     renderer.render scene, camera
+
                 animate()
 
             $scope.$watch 'model', () ->
                 return if !$scope.model || !$scope.loaded
 
-                $scope.model.elements = [
-                    $scope.model.elements[80],
-                    $scope.model.elements[81],
-                    $scope.model.elements[88],
-                ]
+                # $scope.model.elements = [
+                #     $scope.model.elements[80],
+                #     $scope.model.elements[81],
+                #     $scope.model.elements[88],
+                # ]
 
                 # $scope.model.elements = $scope.model.elements.slice 0, 10
 
@@ -128,8 +131,8 @@ App.directive 'three', () ->
                                 ctx.rotate face.rotation * Math.PI / 180
                                 rotationOffset = [canvasSize / 2, canvasSize / 2]
 
-                            console.log k, face.uv[0], face.uv[1], face.uv[2] - face.uv[0], face.uv[3] - face.uv[1]
-                            console.log 'uvs', face.uv
+                            # console.log k, face.uv[0], face.uv[1], face.uv[2] - face.uv[0], face.uv[3] - face.uv[1]
+                            # console.log 'uvs', face.uv
 
                             ctx.drawImage(
                                 textures[face.texture.replace('#', '')],
@@ -137,7 +140,7 @@ App.directive 'three', () ->
                                 -rotationOffset[0], -rotationOffset[1], canvasSize, canvasSize
                             )
 
-                        document.getElementById('debug-div').appendChild canvas
+                        # document.getElementById('debug-div').appendChild canvas
 
                         tex = new THREE.Texture canvas
                         tex.needsUpdate = true
@@ -147,7 +150,6 @@ App.directive 'three', () ->
                             map: tex
 
                     faceMaterial = new THREE.MultiMaterial materials
-                    console.log '========================================'
 
                     pivot = new THREE.Object3D
                     box = new THREE.BoxGeometry size[0], size[1], size[2]
@@ -188,9 +190,9 @@ App.directive 'three', () ->
 
                     pivot.add boxMesh
 
-                    helper = new THREE.BoxHelper pivot, 0xffffff
+                    # helper = new THREE.BoxHelper pivot, 0xffffff
+                    # scene.add helper
 
-                    scene.add helper
                     scene.add pivot
 
     return element
