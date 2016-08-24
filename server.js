@@ -6,7 +6,7 @@ console.log('Starting static server...');
 var app = express();
 
 app.use(function(req, res, next) {
-    res.setHeader('Cache-Control': 'no-transform');
+    res.setHeader('Cache-Control', 'no-transform');
     return next();
 });
 
