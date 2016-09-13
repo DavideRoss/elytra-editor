@@ -5,40 +5,41 @@ App.directive 'three', () ->
         template: '<div id="three-render"></div>'
         scope:
             model: '='
-            onReady: '='
+            lockControls: '='
+            errors: '='
 
         link: ($scope, e) ->
 
             scene = null
+            light = null
+            helper = null
+            camera = null
+            controls = null
 
             textureLoader = null
             textures = {}
 
+            modelObjects = []
+
             e.ready () ->
                 renderer = new THREE.WebGLRenderer
-                    antialias: true
+                    antialias: false
 
-                scene = new THREE.Scene()
+                # scene = new THREE.Scene()
 
                 textureLoader = new THREE.TextureLoader()
+                scene = new THREE.Scene()
 
                 # ===== Light =====================================================================
 
                 light = new THREE.AmbientLight 0xffffff
-                scene.add light
-
                 helper = new THREE.GridHelper 32, 32, 0x0000ff, 0xaaaaaa
-                scene.add helper
-
-                scene.add new THREE.AxisHelper 20
 
                 # ===== Camera ====================================================================
 
-                camera = new THREE.PerspectiveCamera 60, e[0].clientWidth / e[0].clientHeight, .1, 10000
+                camera = new THREE.PerspectiveCamera 60, e[0].clientWidth / e[0].clientHeight, .1, 1000
 
-                scene.add camera
-                camera.position.z = 30
-                camera.position.y = 15
+                camera.position.set(0, 15, 30)
 
                 camera.lookAt new THREE.Vector3 8, 8, 8
                 controls = new THREE.OrbitControls camera
@@ -47,6 +48,8 @@ App.directive 'three', () ->
                 controls.minDistance = 10
                 controls.maxDistance = 1000
                 controls.zoomSpeed = .5
+
+                # controls.enabled = false
 
                 e[0].addEventListener 'wheel', () ->
                     controls.update()
@@ -64,25 +67,35 @@ App.directive 'three', () ->
 
                 animate = () ->
                     requestAnimationFrame animate
-                    renderer.render scene, camera
+                    renderer.render scene, camera if scene
 
                 animate()
 
+            $scope.$watch 'lockControls', () ->
+                controls.enabled = $scope.lockControls if controls
+            , true
+
             $scope.$watch 'model', () ->
                 return if !$scope.model || !$scope.loaded
+                $scope.errors = []
 
-                # $scope.model.elements = [
-                #     $scope.model.elements[80],
-                #     $scope.model.elements[81],
-                #     $scope.model.elements[88],
-                # ]
-
-                # $scope.model.elements = $scope.model.elements.slice 0, 10
+                scene = new THREE.Scene()
+                scene.add light
+                scene.add helper
+                scene.add camera
 
                 async.eachOf $scope.model.textures, (v, k, cb) ->
+                    if k == 'particle'
+                        $scope.errors.push 'Particle found in textures: not yet supported (found "' + v + '")'
+
                     textures[k] = new Image()
                     textures[k].onload = () ->
                         cb()
+
+                    textures[k].onerror = () ->
+                        $scope.$apply () ->
+                            $scope.errors.push 'Cannot load texture "' + v + '", loading default texture instead'
+                            textures[k].src = 'images/blocks/missing_texture.png'
 
                     textures[k].src = 'images/' + v + '.png'
                 , () ->
@@ -130,20 +143,16 @@ App.directive 'three', () ->
                                 ctx.rotate face.rotation * Math.PI / 180
                                 rotationOffset = [canvasSize / 2, canvasSize / 2]
 
-                            # console.log k, face.uv[0], face.uv[1], face.uv[2] - face.uv[0], face.uv[3] - face.uv[1]
-                            # console.log 'uvs', face.uv
-
                             ctx.drawImage(
                                 textures[face.texture.replace('#', '')],
                                 face.uv[0], face.uv[1], face.uv[2] - face.uv[0], face.uv[3] - face.uv[1],
                                 -rotationOffset[0], -rotationOffset[1], canvasSize, canvasSize
                             )
 
-                        # document.getElementById('debug-div').appendChild canvas
-
                         tex = new THREE.Texture canvas
                         tex.needsUpdate = true
                         tex.magFilter = THREE.NearestFilter
+                        tex.minFilter = THREE.NearestFilter
 
                         material = new THREE.MeshPhongMaterial
                             map: tex
@@ -153,10 +162,7 @@ App.directive 'three', () ->
                     pivot = new THREE.Object3D
                     box = new THREE.BoxGeometry size[0], size[1], size[2]
                     boxMesh = new THREE.Mesh box, faceMaterial
-
-                    boxMesh.position.x = (size[0] / 2) + e.from[0]
-                    boxMesh.position.y = (size[1] / 2) + e.from[1]
-                    boxMesh.position.z = (size[2] / 2) + e.from[2]
+                    boxMesh.position.set (size[0] / 2) + e.from[0], (size[1] / 2) + e.from[1], (size[2] / 2) + e.from[2]
 
                     if e.rotation
                         if e.rotation.axis == 'x'
@@ -188,11 +194,9 @@ App.directive 'three', () ->
 
 
                     pivot.add boxMesh
-
-                    # helper = new THREE.BoxHelper pivot, 0xffffff
-                    # scene.add helper
-
                     scene.add pivot
+
+                    modelObjects.push pivot
 
     return element
 

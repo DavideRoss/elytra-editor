@@ -3,11 +3,33 @@ App = angular.module 'App', ['ngRoute', 'ngResource']
 App.run ['$rootScope', '$http',
     ($rootScope, $http) ->
 
-        httpPromise = $http.get 'jsons/bookshelf_rel.json'
+        $rootScope.showInput = false
+        $rootScope.showErrors = false
 
-        httpPromise.then (res) ->
-            setTimeout () ->
-                $rootScope.model = res.data
-                $rootScope.$apply()
-            , 1000
+        $rootScope.errors = []
+
+        $rootScope.loadExample = (file) ->
+            httpPromise = $http.get 'jsons/' + file
+
+            httpPromise.then (res) ->
+                setTimeout () ->
+                    $rootScope.model = res.data
+                    $rootScope.showErrors = false
+                    $rootScope.$apply()
+                , 1000
+
+        $rootScope.loadExample 'torch.json'
+
+        $rootScope.loadJson = () ->
+            $rootScope.showErrors = false
+            try
+                $rootScope.model = JSON.parse $rootScope.inputJson
+                $rootScope.showInput = false
+            catch e
+                $rootScope.jsonError = e.message
+
+        $rootScope.$watch 'errors', () ->
+            if $rootScope.errors && $rootScope.errors.length > 0
+                $rootScope.showErrors = true
+        , true
 ]

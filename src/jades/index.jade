@@ -15,21 +15,18 @@ html
         link(rel="stylesheet", href="/css/style.css")
 
     body(ng-app="App")
-        three.three-render(model="model")
-        #debug-div
-        //- .panel
-        //-     .user-bar
-        //-         img(src="https://unsplash.it/200")
-        //-         span Lampadina
-        //-     .module
-        //-         h2 Walker
-        //-         button(ng-click="sendLogin()") Login
-        //-         p Login status: {{loginStatus}}
-        //-     .module(ng-show="isLoggedIn")
-        //-         h2 Location
-        //-         button(ng-click="setLocation()") Set location
-        //-         p Location: {{serverLocation}}
-        //-     .module(ng-show="serverLocation")
-        //-         h2 Start
-        //-         button(ng-click="start()") Start
-        //-         p Status:
+        .controls-bar(ng-show="!showInput")
+            button(ng-click="showInput = true") Load...
+            button(ng-click="loadExample('chair.json')") Load chair
+            button(ng-click="loadExample('cauldron.json')") Load cauldron
+        three.three-render(model="model", lock-controls="!showInput", errors="errors")
+        .errors-container(ng-show="!showInput && showErrors")
+            p(ng-repeat="error in errors track by $index") {{error}}
+        .input-container(ng-show="showInput")
+            textarea(ng-model="inputJson", placeholder="Put your JSON model file here")
+            .controls
+                .errors
+                    span {{jsonError}}
+                .buttons
+                    button(ng-click="showInput = false") Cancel
+                    button(ng-click="loadJson()") Load
